@@ -5,7 +5,6 @@
 import pandas as pd
 import re
 import json
-from pprint import pprint
 
 # 1 - Read the data using pandas
 df = pd.read_csv('data/titanic_train.csv')
@@ -41,6 +40,8 @@ print("Cabin columns is removed")
 # Embarked, Desk, Age have missing values
 df['Age'].fillna(df.Age.mean(), inplace=True)
 df['Age'] = df['Age'].round() # round the age
+df['Age'] = df['Age'].astype(int) # Convert floats to int
+
 df.Embarked.fillna(df.Embarked.mode()[0], inplace=True)
 df.Desk.fillna(df.Desk.mode()[0], inplace=True)
 print("Filling the missing values")
@@ -60,9 +61,14 @@ print("Filling the missing values")
 # 0  0  0  0
 # 1  1  1  1
 # 2  1  2  1
-# df.apply(lambda x: pd.factorize(x)[0])
-stacked = df[['Sex', 'Embarked','Desk']].stack()
-df[['Sex', 'Embarked','Desk']] = pd.Series(stacked.factorize()[0], index=stacked.index).unstack()
+# df.apply(lambda x: pd.factorize(x)[0]) # do to whole data frame
+# For some reason below generates wrong indecis
+# stacked = df[['Sex', 'Embarked','Desk']].stack()
+# df[['Sex', 'Embarked','Desk']] = pd.Series(stacked.factorize()[0], index=stacked.index).unstack()
+df['Sex'] = pd.factorize(df['Sex'])[0]
+df['Embarked'] = pd.factorize(df['Embarked'])[0]
+df['Desk'] = pd.factorize(df['Desk'])[0]
+
 print("Sex, Embarked, Desk is factorized")
 # 6 - Save the all numeric containing values to .csv and then convert it to .json format
 # [
@@ -78,18 +84,8 @@ print("Sex, Embarked, Desk is factorized")
 # ]
 # Exclude pandas' index in csv
 df.to_csv('output/titanic.csv', index=False)
-# Print in the following format
-# [
-#     {
-#         "Deck": 0,
-#         "Age": 20,
-#         "Survived", 0
-#         ...
-#     },
-#     {
-#         ...
-#     }
-# ]
+
+# Pretty print via python's json library
 df.to_json('output/temp.json', orient='records')
 with open('output/temp.json') as json_data:
     d = json.load(json_data)
