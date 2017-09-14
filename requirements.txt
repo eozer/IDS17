@@ -1,3 +1,7 @@
 pandas
 ipython
 nltk
+notebook
+ipywidgets
+jupyter-emacskeys
+qgrid
