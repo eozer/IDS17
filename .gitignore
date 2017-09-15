@@ -7,5 +7,5 @@ pip-selfcheck.json
 exercises_backup.jpeg
 .idea/*
 share/*
+.ipynb_checkpoints
 etc/*
-src/.ipynb_checkpoints/*
