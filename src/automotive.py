@@ -4,6 +4,7 @@
 ##  Univ. of Helsinki, Ege Can Ozer - 014692310
 
 import pandas as pd
+import numpy as np
 import gzip
 import nltk
 import re
@@ -28,15 +29,31 @@ def getDF(path):
 print("Reading the json data..")
 df = getDF('data/reviews_Automotive_5.json.gz')
 
+def filler(df):
+    for idx, row in df.iterrows():
+        if (row['reviewText'] ==  '') or (row['reviewText'] == np.nan):
+            if (row['summary'] is not np.nan) or (row['summary'] != ''):
+                df.loc[idx, 'reviewText'] = row['summary']
+            else:
+                df.loc[idx, 'reviewText'] = 'egecan'
+    return df
+# There are nan values inside reviewText, fill with the summary column first
+# df.reviewText = df.reviewText.replace(r'\s', np.nan, regex=True)
+df.reviewText = df.reviewText.fillna(df.summary)
+df.reviewText = df.reviewText.fillna('')
+df = filler(df)
+
 # b) Access the reviewText field, and downcase the contents
 df.reviewText = df.reviewText.map(lambda x : x.lower())
 
-
 print("Reading the stop words..")
 # Read stop_words and convert it to a set
-stop_words = set(pd.read_csv('data/automotive_stop_words.csv'))
+stop_words = set()
+with open("data/automotive_stop_words.csv") as f:
+    stop_words = set(f.read().split(", "))
 # Add 't' to handle this case in sanitize step, can't -> can t -> can
 stop_words.add('t')
+stop_words.add('s')
 
 # TODO: Improve the punctuation remove
 def sanitize(review):
@@ -52,20 +69,22 @@ def sanitize(review):
     clean = re.sub(' +', ' ', clean) # remove more than 1 whitespaces
     words = nltk.word_tokenize(clean)
     # Remove stop-words
-    words = [w for w in words if w not in stop_words]
+    removed_words = []
+    for w in words:
+        if w not in stop_words:
+            removed_words.append(w)
+    #removed_words = [w for w in words if w not in stop_words]
     # d) Apply a stemmer on the paragraphs, so that inflected
     # forms are mapped to the base form. For example,
     # for python the popular natural language toolkit nltk has
     # an easy-to-use stemmer.
     stemmer = nltk.stem.snowball.SnowballStemmer("english")
-    res = [stemmer.stem(w) for w in words]
+    res = [stemmer.stem(w) for w in removed_words]
     # Final touch join the words
     return " ".join(res)
 
 print("Sanitizing the reviews...")
 df.reviewText = df.reviewText.map(lambda x : sanitize(x))
-
-
 # e) Filter the data by selecting reviews where the field
 # overall is 4 or 5, and store the review texts in file pos.txt.
 # Similarly, select reviews with rating 1 or 2 and store the
