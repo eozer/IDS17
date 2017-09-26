@@ -3,5 +3,11 @@ ipython
 nltk
 notebook
 ipywidgets
-qgrid
-geopandas
+qgrid # only works with notebook, and no virtualenv
+geopandas # on windows this is problematic for some reason
+matplotlib
+patsy
+statsmodels
+# install sklearn and its dependencies manually on windows, again something problematic
+# mainly because of the scipy -> numpy+mktl thing
+
