@@ -9,3 +9,7 @@ exercises_backup.jpeg
 share/*
 .ipynb_checkpoints
 etc/*
+src/data/HASYv2
+src/data/HASYv2/*
+src/dependencies/*
+src/data/HASYv2.tar.bz2
